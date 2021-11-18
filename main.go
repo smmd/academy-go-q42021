@@ -1,35 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gin-gonic/gin"
 	pokereader "github.com/smmd/academy-go-q42021/reader"
 )
 
 func main() {
-	var pokeId int
-	var filePath string
+	router := gin.Default()
 
-	fmt.Print("Enter a Pokemon ID: ")
-
-	_, err := fmt.Scanf("%d", &pokeId)
-
-	if err != nil {
-		panic(fmt.Errorf("could not read ID: %w", err))
-	}
-
-	fmt.Print("Enter the csv path: ")
-
-	_, err = fmt.Scanf("%s", &filePath)
-
-	if err != nil {
-		panic(fmt.Errorf("could not read Path: %w", err))
-	}
-
-	pokeMonsters, err := pokereader.GetPokeMonstersFromFile(filePath)
+	pokeMonsters, err := pokereader.GetPokeMonstersFromFile("reader/fixtures/pokedex_data.csv")
 
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(pokeMonsters.SearchNameById(pokeId))
+	router.GET("/pokemonsters/", pokeMonsters.GetPokeMonsters)
+	router.GET("/pokemonsters/:id", pokeMonsters.SearchNameById)
+
+	router.Run(":3001")
 }

@@ -1,14 +1,14 @@
 package model
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestNewPokemon(t *testing.T) {
-	poke := NewPokemon(3, "pikachu")
+	poke := NewPokemon("3", "pikachu")
 	expected := &Pokemon{
-		3,
+		"3",
 		"pikachu",
 	}
 
@@ -16,22 +16,20 @@ func TestNewPokemon(t *testing.T) {
 	assert.Equal(t, actual, expected)
 }
 
-func TestGettingPokemonNameById(t *testing.T)  {
-	pokeMonsters := &PokeMonsters{
+// TODO: figure out how to test this
+/*func TestGettingPokemonMonsters(t *testing.T)  {
+	gin.SetMode(gin.TestMode)
+
+	mockPokeMonsters := &PokeMonsters{
 		[]*Pokemon{
 			{
-				Id: 10,
+				ID:   "10",
 				Name: "jigglypuff",
 			},
 			{
-				Id: 150,
+				ID:   "150",
 				Name: "mewtwo",
 			},
 		},
 	}
-
-	expected := "jigglypuff"
-	actual := pokeMonsters.SearchNameById(10)
-
-	assert.Equal(t, actual, expected)
-}
+}*/

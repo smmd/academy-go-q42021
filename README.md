@@ -2,15 +2,23 @@
 
 ## Sagrario Meneses First Deliverable
 
-Usage example of the developer script:
+Usage example of the developer API.
 
+Running server:
 ```bash
 go run main.go
+```
 
-Enter a Pokemon ID: 1
-Enter the csv path: reader/fixtures/pokedex_data.csv
+GET All Poke monsters:
 
-bulbasaur
+```curl
+curl http://localhost:3001/pokemonsters/
+```
+
+GET Poke monster by ID:
+
+```curl
+curl http://localhost:3001/pokemonsters/{id}
 ```
 
 # Bootcamp original instructions

@@ -1,36 +1,49 @@
 package model
 
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
 type Pokemon struct {
-	Id   int
-	Name string
+	ID   string `json:"pokemon_id"`
+	Name string `json:"name"`
 }
 
 type PokeMonsters struct {
 	Pokemon []*Pokemon
 }
 
-func NewPokemon(id int, name string)  *Pokemon{
+func NewPokemon(id string, name string)  *Pokemon{
 	p := new(Pokemon)
-	p.Id = id
+	p.ID = id
 	p.Name = name
 
 	return p
 }
 
-func (p Pokemon) GetId() int {
-	return p.Id
+func (p Pokemon) GetId() string {
+	return p.ID
 }
 
 func (p Pokemon) GetName() string {
 	return p.Name
 }
 
-func (p *PokeMonsters) SearchNameById(idToFind int) string {
+func (p *PokeMonsters) SearchNameById(c *gin.Context) {
+	id := c.Param("id")
+
 	for _, poke := range p.Pokemon {
-		if poke.Id == idToFind {
-			return poke.Name
+		if poke.ID == id {
+			c.IndentedJSON(http.StatusOK, poke)
+
+            return
 		}
 	}
 
-	return "none"
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+}
+
+func (p *PokeMonsters) GetPokeMonsters(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, p)
 }

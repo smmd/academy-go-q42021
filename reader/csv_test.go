@@ -10,15 +10,15 @@ func TestConvertingCSVDataToModelObj(t *testing.T)  {
 	expected := &model.PokeMonsters{
 		[]*model.Pokemon{
 			{
-				Id: 1,
+				ID:   "1",
 				Name: "bulbasaur",
 			},
 			{
-				Id: 2,
+				ID:   "2",
 				Name: "ivysaur",
 			},
 			{
-				Id: 3,
+				ID:   "3",
 				Name: "venusaur",
 			},
 		},
@@ -32,5 +32,5 @@ func TestConvertingCSVDataToModelObj(t *testing.T)  {
 func TestThrowingErrorFileNoExist(t *testing.T)  {
 	_, actual := GetPokeMonstersFromFile("fixtures/pokedex_data_fail.csv")
 
-	assert.EqualError(t, actual, "Error reading file.")
+	assert.EqualError(t, actual, "open fixtures/pokedex_data_fail.csv: no such file or directory")
 }
