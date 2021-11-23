@@ -1,5 +1,27 @@
 # Golang Bootcamp
 
+## Sagrario Meneses First Deliverable
+
+Usage example of the developer API.
+
+Running server:
+```bash
+go run main.go
+```
+
+GET All Poke monsters:
+
+```curl
+curl http://localhost:3001/pokemonsters/
+```
+
+GET Poke monster by ID:
+
+```curl
+curl http://localhost:3001/pokemonsters/{id}
+```
+
+# Bootcamp original instructions
 ## Introduction
 
 Thank you for participating in the Golang Bootcamp course!
