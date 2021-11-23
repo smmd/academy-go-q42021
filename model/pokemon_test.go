@@ -15,21 +15,3 @@ func TestNewPokemon(t *testing.T) {
 	actual := poke
 	assert.Equal(t, actual, expected)
 }
-
-// TODO: figure out how to test this
-/*func TestGettingPokemonMonsters(t *testing.T)  {
-	gin.SetMode(gin.TestMode)
-
-	mockPokeMonsters := &PokeMonsters{
-		[]*Pokemon{
-			{
-				ID:   "10",
-				Name: "jigglypuff",
-			},
-			{
-				ID:   "150",
-				Name: "mewtwo",
-			},
-		},
-	}
-}*/
