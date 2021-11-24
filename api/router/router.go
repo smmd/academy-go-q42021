@@ -12,5 +12,7 @@ func Route()  {
 	router.GET("/pokemonsters/", service.GetAll)
 	router.GET("/pokemonsters/:id", service.GetOneByID)
 
+	router.GET("/fill-pokedex/", service.ConsumeNationalPokedex)
+
 	router.Run(":3001")
 }

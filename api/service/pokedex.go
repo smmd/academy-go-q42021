@@ -1,13 +1,13 @@
 package service
 
 import (
-	pokereader "github.com/smmd/academy-go-q42021/reader"
+	pokereader "github.com/smmd/academy-go-q42021/repository"
 
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-const FileName = "reader/fixtures/pokedex_data.csv"
+const FileName = "repository/files/pokedex_data.csv"
 
 func GetAll(c *gin.Context)  {
 	pokeMonsters, err := pokereader.GetAllPokeMonsters(FileName)
