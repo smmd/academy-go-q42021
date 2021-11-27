@@ -6,11 +6,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Route()  {
+type search interface {
+	GetAll(c *gin.Context)
+	GetOneByID(c *gin.Context)
+}
+
+type PokemonsHandler struct {
+	searchService search
+}
+
+func NewPokemonsHandler(search search) PokemonsHandler {
+	return PokemonsHandler{search}
+}
+
+func (ph PokemonsHandler) Route()  {
 	router := gin.Default()
 
-	router.GET("/pokemonsters/", service.GetAll)
-	router.GET("/pokemonsters/:id", service.GetOneByID)
+	router.GET("/pokemonsters/", ph.searchService.GetAll)
+	router.GET("/pokemonsters/:id", ph.searchService.GetOneByID)
 
 	router.GET("/fill-pokedex/", service.ConsumeNationalPokedex)
 

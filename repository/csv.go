@@ -9,7 +9,13 @@ import (
 	"encoding/csv"
 )
 
-func GetAllPokeMonsters(filePath string) (model.PokeMonsters, error) {
+type AllPokeMonsters struct {}
+
+func NewAllPokeMonsters() AllPokeMonsters {
+	return AllPokeMonsters{}
+}
+
+func (AllPokeMonsters) GetAllPokeMonsters(filePath string) (model.PokeMonsters, error) {
 	lines, err := csvToObject(filePath)
 
 	pokemons := []model.Pokemon{}
@@ -28,11 +34,11 @@ func GetAllPokeMonsters(filePath string) (model.PokeMonsters, error) {
 	return pokeMonsters, nil
 }
 
-func WritePokeMonsters(response model.Response, filePath string)  {
+func WritePokeMonsters(response model.Response, filePath string) error {
 	file, err := os.OpenFile(filePath, os.O_RDWR, 0)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	defer file.Close()
@@ -46,9 +52,11 @@ func WritePokeMonsters(response model.Response, filePath string)  {
 		err := writer.Write(poke)
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
+
+	return nil
 }
 
 func csvToObject(filePath string) ([][]string, error) {

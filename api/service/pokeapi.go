@@ -14,7 +14,7 @@ func ConsumeNationalPokedex(c *gin.Context)  {
 	response, err := http.Get("https://pokeapi.co/api/v2/pokedex/1/")
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
@@ -25,7 +25,11 @@ func ConsumeNationalPokedex(c *gin.Context)  {
 	var responseObject model.Response
 	json.Unmarshal(responseData, &responseObject)
 
-	repository.WritePokeMonsters(responseObject, FileName)
+	err = repository.WritePokeMonsters(responseObject, FileName)
 
-	c.IndentedJSON(http.StatusOK, []string {"ok"})
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, []string {err.Error()})
+	} else {
+		c.IndentedJSON(http.StatusOK, []string {"ok"})
+	}
 }
