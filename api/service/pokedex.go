@@ -26,9 +26,9 @@ func (ss SearchService) GetAll(c *gin.Context) {
 
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, fmt.Errorf(err.Error()))
+	} else {
+		c.IndentedJSON(http.StatusOK, pokeMonsters)
 	}
-
-	c.IndentedJSON(http.StatusOK, pokeMonsters)
 }
 
 func (ss SearchService) GetOneByID(c *gin.Context) {
@@ -36,12 +36,12 @@ func (ss SearchService) GetOneByID(c *gin.Context) {
 	pokeMonsters, err := ss.repo.GetAllPokeMonsters(FileName)
 
 	if err != nil {
-		panic(err)
-	}
-
-	for _, poke := range pokeMonsters.Pokemons {
-		if poke.ID == id {
-			c.IndentedJSON(http.StatusOK, poke)
+		c.IndentedJSON(http.StatusInternalServerError, fmt.Errorf(err.Error()))
+	} else {
+		for _, poke := range pokeMonsters.Pokemons {
+			if poke.ID == id {
+				c.IndentedJSON(http.StatusOK, poke)
+			}
 		}
 	}
 }

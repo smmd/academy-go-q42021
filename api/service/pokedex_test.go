@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"net/http"
@@ -60,13 +61,12 @@ func TestSearchService_GetAll(t *testing.T) {
 			nil,
 		},
 		{
-			"error when emtpy response",
+			"error when repository emtpy response",
 			model.PokeMonsters{ []model.Pokemon{}},
 			"repository/files/pokedex_data.csv",
 			http.StatusInternalServerError,
 			errors.New("test error"),
 		},
-		//TODO: add more cases
 	}
 
 	gin.SetMode(gin.TestMode)
@@ -91,4 +91,20 @@ func TestSearchService_GetAll(t *testing.T) {
 	}
 }
 
-//TODO: TestSearchService_GetOneByID
+func TestSearchService_GetOneByID(t *testing.T)  {
+	mock := mockCsvRepo{}
+	mock.On("GetAllPokeMonsters", "repository/files/pokedex_data.csv").Return(pokemonsters, nil)
+
+	service := NewSearchService(mock)
+
+	r := gin.Default()
+	r.GET("/pokemonsters/:id", service.GetOneByID)
+
+	body := `{"id": "1"}`
+	req, _ := http.NewRequest(http.MethodGet, "/pokemonsters/:id", strings.NewReader(body))
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}

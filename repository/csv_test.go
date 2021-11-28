@@ -67,5 +67,23 @@ func TestAllPokeMonsters_GetAllPokeMonsters(t *testing.T)  {
 }
 
 func TestCsvRepo_WritePokeMonsters(t *testing.T) {
-	//TODO
+	response := model.Response {
+		"jotto",
+		[]model.PokemonOriginal {
+			{
+				1,
+				model.PokemonSpecies{
+					"bulbasaur",
+				},
+			},
+		},
+	}
+
+	err := WritePokeMonsters(response, "fixtures/pokedex_test.csv")
+
+	if err != nil {
+		assert.EqualError(t, err, err.Error())
+	} else {
+		assert.Nil(t, err)
+	}
 }
