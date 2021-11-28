@@ -2,9 +2,11 @@ package service
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/smmd/academy-go-q42021/model"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/smmd/academy-go-q42021/model"
 )
 
 const FileName = "repository/files/pokedex_data.csv"

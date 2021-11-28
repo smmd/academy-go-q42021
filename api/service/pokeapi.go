@@ -1,13 +1,16 @@
 package service
 
 import (
+	"log"
+
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+
 	"github.com/smmd/academy-go-q42021/model"
 	"github.com/smmd/academy-go-q42021/repository"
-	"io/ioutil"
-	"log"
-	"net/http"
 )
 
 func ConsumeNationalPokedex(c *gin.Context)  {

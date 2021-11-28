@@ -4,9 +4,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/smmd/academy-go-q42021/model"
-
 	"encoding/csv"
+
+	"github.com/smmd/academy-go-q42021/model"
 )
 
 type AllPokeMonsters struct {}
