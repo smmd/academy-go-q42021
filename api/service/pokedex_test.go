@@ -2,11 +2,7 @@ package service
 
 import (
 	"errors"
-	"strings"
 	"testing"
-
-	"net/http"
-	"net/http/httptest"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -50,21 +46,24 @@ func TestSearchService_GetAll(t *testing.T) {
 		name string
 		response model.PokeMonsters
 		argument string
-		code int
+		repoErr error
+		expected model.PokeMonsters
 		err error
 	}{
 		{
-			"response pokemons properly",
+			"get all pokemons properly",
 			pokemonsters,
 			"repository/files/pokedex_data.csv",
-			http.StatusOK,
+			nil,
+			pokemonsters,
 			nil,
 		},
 		{
 			"error when repository emtpy response",
 			model.PokeMonsters{ []model.Pokemon{}},
 			"repository/files/pokedex_data.csv",
-			http.StatusInternalServerError,
+			errors.New("test error"),
+			model.PokeMonsters{ []model.Pokemon{}},
 			errors.New("test error"),
 		},
 	}
@@ -73,38 +72,30 @@ func TestSearchService_GetAll(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mock := mockCsvRepo{}
-			mock.On("GetAllPokeMonsters", tc.argument).Return(tc.response, tc.err)
+			mockRepo := mockCsvRepo{}
+			mockRepo.On("GetAllPokeMonsters", tc.argument).Return(tc.response, tc.repoErr)
 
-			service := NewSearchService(mock)
+			service := NewSearchService(mockRepo)
+			actual, err := service.GetAll()
 
-			r := gin.Default()
-			r.GET("/pokemonsters/", service.GetAll)
-
-			req, _ := http.NewRequest(http.MethodGet, "/pokemonsters/", nil)
-
-			w := httptest.NewRecorder()
-			r.ServeHTTP(w, req)
-
-			assert.Equal(t, tc.code, w.Code)
+			assert.Equal(t, tc.expected, actual)
+			assert.Equal(t, tc.err, err)
 		})
 	}
 }
 
 func TestSearchService_GetOneByID(t *testing.T)  {
-	mock := mockCsvRepo{}
-	mock.On("GetAllPokeMonsters", "repository/files/pokedex_data.csv").Return(pokemonsters, nil)
+	expected := model.Pokemon{
+		"3",
+		"pikachu",
+	}
 
-	service := NewSearchService(mock)
+	mockRepo := mockCsvRepo{}
+	mockRepo.On("GetAllPokeMonsters", "repository/files/pokedex_data.csv").Return(pokemonsters, nil)
 
-	r := gin.Default()
-	r.GET("/pokemonsters/:id", service.GetOneByID)
+	service := NewSearchService(mockRepo)
+	actual, err := service.GetOneByID("3")
 
-	body := `{"id": "1"}`
-	req, _ := http.NewRequest(http.MethodGet, "/pokemonsters/:id", strings.NewReader(body))
-
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, expected, actual)
+	assert.Equal(t, err, nil)
 }

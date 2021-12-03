@@ -79,7 +79,9 @@ func TestCsvRepo_WritePokeMonsters(t *testing.T) {
 		},
 	}
 
-	err := WritePokeMonsters(response, "fixtures/pokedex_test.csv")
+	repo := NewPokeMonstersWriter()
+
+	err := repo.WritePokeMonsters(response, "fixtures/pokedex_test.csv")
 
 	if err != nil {
 		assert.EqualError(t, err, err.Error())

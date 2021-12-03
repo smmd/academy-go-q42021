@@ -1,11 +1,6 @@
 package service
 
 import (
-	"fmt"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-
 	"github.com/smmd/academy-go-q42021/model"
 )
 
@@ -23,27 +18,22 @@ func NewSearchService(repo getter) SearchService {
 	return SearchService{repo}
 }
 
-func (ss SearchService) GetAll(c *gin.Context) {
-	pokeMonsters, err := ss.repo.GetAllPokeMonsters(FileName)
-
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, fmt.Errorf(err.Error()))
-	} else {
-		c.IndentedJSON(http.StatusOK, pokeMonsters)
-	}
+// GetAll returns all pokemons from db
+func (ss SearchService) GetAll() (model.PokeMonsters, error) {
+	return ss.repo.GetAllPokeMonsters(FileName)
 }
 
-func (ss SearchService) GetOneByID(c *gin.Context) {
-	id := c.Param("id")
+// GetOneByID return the pokemon from db that matches the ID
+func (ss SearchService) GetOneByID(id string) (model.Pokemon, error) {
 	pokeMonsters, err := ss.repo.GetAllPokeMonsters(FileName)
 
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, fmt.Errorf(err.Error()))
-	} else {
+	if err == nil {
 		for _, poke := range pokeMonsters.Pokemons {
 			if poke.ID == id {
-				c.IndentedJSON(http.StatusOK, poke)
+				return poke, nil
 			}
 		}
 	}
+
+	return model.Pokemon{}, err
 }

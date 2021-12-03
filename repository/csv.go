@@ -11,8 +11,14 @@ import (
 
 type AllPokeMonsters struct {}
 
+type PokeMonstersWriter struct {}
+
 func NewAllPokeMonsters() AllPokeMonsters {
 	return AllPokeMonsters{}
+}
+
+func NewPokeMonstersWriter() PokeMonstersWriter {
+	return PokeMonstersWriter{}
 }
 
 func (AllPokeMonsters) GetAllPokeMonsters(filePath string) (model.PokeMonsters, error) {
@@ -34,7 +40,7 @@ func (AllPokeMonsters) GetAllPokeMonsters(filePath string) (model.PokeMonsters, 
 	return pokeMonsters, nil
 }
 
-func WritePokeMonsters(response model.Response, filePath string) error {
+func (PokeMonstersWriter) WritePokeMonsters(response model.Response, filePath string) error {
 	file, err := os.OpenFile(filePath, os.O_RDWR, 0)
 
 	if err != nil {

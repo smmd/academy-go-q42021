@@ -1,31 +1,22 @@
 package router
 
 import (
-	"github.com/smmd/academy-go-q42021/api/service"
-
 	"github.com/gin-gonic/gin"
+
+	"github.com/smmd/academy-go-q42021/api/service"
+	"github.com/smmd/academy-go-q42021/controller"
+	"github.com/smmd/academy-go-q42021/repository"
 )
 
-type search interface {
-	GetAll(c *gin.Context)
-	GetOneByID(c *gin.Context)
-}
+func Route()  {
+	searchService := service.NewSearchService(repository.NewAllPokeMonsters())
+	apiService := service.NewWriteService(repository.NewPokeMonstersWriter())
+	apiController := controller.NewPokemonsHandler(searchService, apiService)
 
-type PokemonsHandler struct {
-	searchService search
-}
-
-func NewPokemonsHandler(search search) PokemonsHandler {
-	return PokemonsHandler{search}
-}
-
-func (ph PokemonsHandler) Route()  {
 	router := gin.Default()
-
-	router.GET("/pokemonsters/", ph.searchService.GetAll)
-	router.GET("/pokemonsters/:id", ph.searchService.GetOneByID)
-
-	router.GET("/fill-pokedex/", service.ConsumeNationalPokedex)
+	router.GET("/pokemonsters/", apiController.PokeMonsters)
+	router.GET("/pokemonsters/:id", apiController.Pokemon)
+	router.GET("/fill-pokedex/", apiController.Pokedex)
 
 	router.Run(":3001")
 }
