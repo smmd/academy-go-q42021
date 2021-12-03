@@ -1,35 +1,39 @@
 package service
 
 import (
-	pokereader "github.com/smmd/academy-go-q42021/reader"
-
-	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/smmd/academy-go-q42021/model"
 )
 
-const FileName = "reader/fixtures/pokedex_data.csv"
+const FileName = "repository/files/pokedex_data.csv"
 
-func GetAll(c *gin.Context)  {
-	pokeMonsters, err := pokereader.GetAllPokeMonsters(FileName)
-
-	if err != nil {
-		panic(err)
-	}
-
-	c.IndentedJSON(http.StatusOK, pokeMonsters)
+type getter interface {
+	GetAllPokeMonsters(filePath string) (model.PokeMonsters, error)
 }
 
-func GetOneByID(c *gin.Context) {
-	id := c.Param("id")
-	pokeMonsters, err := pokereader.GetAllPokeMonsters(FileName)
+type SearchService struct {
+	repo getter
+}
 
-	if err != nil {
-		panic(err)
-	}
+func NewSearchService(repo getter) SearchService {
+	return SearchService{repo}
+}
 
-	for _, poke := range pokeMonsters.Pokemons {
-		if poke.ID == id {
-			c.IndentedJSON(http.StatusOK, poke)
+// GetAll returns all pokemons from db
+func (ss SearchService) GetAll() (model.PokeMonsters, error) {
+	return ss.repo.GetAllPokeMonsters(FileName)
+}
+
+// GetOneByID return the pokemon from db that matches the ID
+func (ss SearchService) GetOneByID(id string) (model.Pokemon, error) {
+	pokeMonsters, err := ss.repo.GetAllPokeMonsters(FileName)
+
+	if err == nil {
+		for _, poke := range pokeMonsters.Pokemons {
+			if poke.ID == id {
+				return poke, nil
+			}
 		}
 	}
+
+	return model.Pokemon{}, err
 }

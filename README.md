@@ -10,15 +10,18 @@ go run main.go
 ```
 
 GET All Poke monsters:
-
 ```curl
 curl http://localhost:3001/pokemonsters/
 ```
 
 GET Poke monster by ID:
-
 ```curl
 curl http://localhost:3001/pokemonsters/{id}
+```
+
+Consume external api and populate CSV:
+```curl
+http://localhost:3001/fill-pokedex/
 ```
 
 # Bootcamp original instructions
