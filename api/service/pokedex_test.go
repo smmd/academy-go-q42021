@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -67,8 +66,6 @@ func TestSearchService_GetAll(t *testing.T) {
 			errors.New("test error"),
 		},
 	}
-
-	gin.SetMode(gin.TestMode)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
