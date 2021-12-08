@@ -12,6 +12,12 @@ import (
 
 const FileName = "repository/files/pokedex_data.csv"
 
+type Conditions struct {
+	isOdd bool
+	limitPerWorker int
+	maxItems int
+}
+
 type Request struct {
 	TypeOfJob      string `json:"type" validate:"enum"`
 	NumberOfItems  int `json:"items" validate:"required"`
@@ -32,10 +38,15 @@ func NewPokemonWorker() WorkerHandler {
 
 func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	result := make([]*model.Pokemon, 0)
-	errs := make(chan error, 1)
+	csvError := make(chan error, 1)
 	channelJobs := make(chan []string, request.ItemsPerWorker)
 	channelResult := make (chan *model.Pokemon)
-	isOdd := request.TypeOfJob == "odd"
+
+	conditions := &Conditions {
+		request.TypeOfJob == "odd",
+		request.ItemsPerWorker,
+		request.NumberOfItems,
+	}
 
 	file, err := os.Open(FileName)
 	if err != nil {
@@ -51,13 +62,13 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 
 	var wg sync.WaitGroup
 
-	workerCount := request.NumberOfItems / request.ItemsPerWorker
-	wg.Add(workerCount)
+	workersNumber := workerCount(request.NumberOfItems, request.ItemsPerWorker)
+	wg.Add(workersNumber)
 
-	for i := 0; i < workerCount; i++ {
+	for i := 0; i < workersNumber; i++ {
 		go func() {
 			defer wg.Done()
-			worker(channelJobs, channelResult, isOdd, request.ItemsPerWorker)
+			worker(channelJobs, channelResult, conditions)
 		}()
 	}
 
@@ -68,18 +79,16 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 				break
 			}
 			if err != nil {
-				errs <- err
+				csvError <- err
 				break
 			}
 
 			channelJobs <- rStr
 		}
 
+		close(csvError)
 		close(channelJobs)
-		close(errs)
 	}()
-
-	//for _, e := range er
 
 	go func() {
 		wg.Wait()
@@ -97,29 +106,45 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	}
 }
 
-func worker(channelJobs <-chan []string, channelResult chan<- *model.Pokemon, isOdd bool, limit int)  {
+func workerCount(numberOfItems int, itemsPerWorker int) int {
+	count := numberOfItems / itemsPerWorker
+
+	if numberOfItems % itemsPerWorker > 0 {
+		return count + 1
+	}
+
+	return count
+}
+
+func worker(channelJobs <-chan []string, channelResult chan<- *model.Pokemon, conditions *Conditions) {
 	countItems := 0
 
 	for {
 		job, ok := <-channelJobs
+
 		if !ok {
 			return
 		}
 
-		if countItems == limit {
+		if countItems == conditions.limitPerWorker {
+			return
+		}
+
+		if conditions.maxItems == 0 {
 			return
 		}
 
 		pokeId, _ := strconv.Atoi(job[0])
-		if isOdd && pokeId%2 != 0 {
+		if conditions.isOdd && pokeId%2 != 0 {
 			continue
 		}
 
-		if !isOdd && pokeId%2 == 0 {
+		if !conditions.isOdd && pokeId%2 == 0 {
 			continue
 		}
 
 		channelResult <- parsePokemon(job)
+		conditions.maxItems--
 		countItems++
 	}
 }

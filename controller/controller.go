@@ -94,7 +94,7 @@ func (ph PokemonsHandler) PokeMonstersByWorker(c *gin.Context)  {
 	response := ph.pokeWorker.PokemonWorkerPool(wrequest)
 
 	if response.Err != nil {
-		c.JSON(http.StatusInternalServerError, fmt.Errorf(response.Err.Error()))
+		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
