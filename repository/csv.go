@@ -9,9 +9,9 @@ import (
 	"github.com/smmd/academy-go-q42021/model"
 )
 
-type AllPokeMonsters struct {}
+type AllPokeMonsters struct{}
 
-type PokeMonstersWriter struct {}
+type PokeMonstersWriter struct{}
 
 func NewAllPokeMonsters() AllPokeMonsters {
 	return AllPokeMonsters{}
@@ -53,7 +53,7 @@ func (PokeMonstersWriter) WritePokeMonsters(response model.Response, filePath st
 	defer writer.Flush()
 
 	for _, pokemon := range response.PokemonOriginal {
-		poke := []string {strconv.Itoa(pokemon.EntryNo), pokemon.Species.Name}
+		poke := []string{strconv.Itoa(pokemon.EntryNo), pokemon.Species.Name}
 
 		err := writer.Write(poke)
 

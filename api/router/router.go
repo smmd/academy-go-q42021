@@ -9,7 +9,7 @@ import (
 	"github.com/smmd/academy-go-q42021/wpool"
 )
 
-func Route()  {
+func Route() {
 	searchService := service.NewSearchService(repository.NewAllPokeMonsters())
 	apiService := service.NewWriteService(repository.NewPokeMonstersWriter())
 	worker := wpool.NewPokemonWorker()

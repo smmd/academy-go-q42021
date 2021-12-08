@@ -9,7 +9,7 @@ type PokeMonsters struct {
 	Pokemons []Pokemon
 }
 
-func NewPokemon(id string, name string) *Pokemon{
+func NewPokemon(id string, name string) *Pokemon {
 	p := new(Pokemon)
 	p.ID = id
 	p.Name = name

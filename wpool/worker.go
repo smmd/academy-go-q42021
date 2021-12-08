@@ -13,15 +13,15 @@ import (
 const FileName = "repository/files/pokedex_data.csv"
 
 type Conditions struct {
-	isOdd bool
+	isOdd          bool
 	limitPerWorker int
-	maxItems int
+	maxItems       int
 }
 
 type Request struct {
 	TypeOfJob      string `json:"type" validate:"enum"`
-	NumberOfItems  int `json:"items" validate:"required"`
-	ItemsPerWorker int `json:"items_per_workers" validate:"required"`
+	NumberOfItems  int    `json:"items" validate:"required"`
+	ItemsPerWorker int    `json:"items_per_workers" validate:"required"`
 }
 
 type Response struct {
@@ -30,7 +30,7 @@ type Response struct {
 	JobRequest Request
 }
 
-type WorkerHandler struct {}
+type WorkerHandler struct{}
 
 func NewPokemonWorker() WorkerHandler {
 	return WorkerHandler{}
@@ -40,9 +40,9 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	result := make([]*model.Pokemon, 0)
 	csvError := make(chan error, 1)
 	channelJobs := make(chan []string, request.ItemsPerWorker)
-	channelResult := make (chan *model.Pokemon)
+	channelResult := make(chan *model.Pokemon)
 
-	conditions := &Conditions {
+	conditions := &Conditions{
 		request.TypeOfJob == "odd",
 		request.ItemsPerWorker,
 		request.NumberOfItems,
@@ -51,8 +51,8 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	file, err := os.Open(FileName)
 	if err != nil {
 		return Response{
-			Value: nil,
-			Err: err,
+			Value:      nil,
+			Err:        err,
 			JobRequest: request,
 		}
 	}
@@ -100,8 +100,8 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	}
 
 	return Response{
-		Value: result,
-		Err: nil,
+		Value:      result,
+		Err:        nil,
 		JobRequest: request,
 	}
 }
@@ -109,7 +109,7 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 func workerCount(numberOfItems int, itemsPerWorker int) int {
 	count := numberOfItems / itemsPerWorker
 
-	if numberOfItems % itemsPerWorker > 0 {
+	if numberOfItems%itemsPerWorker > 0 {
 		return count + 1
 	}
 
@@ -149,9 +149,9 @@ func worker(channelJobs <-chan []string, channelResult chan<- *model.Pokemon, co
 	}
 }
 
-func parsePokemon(data []string)  *model.Pokemon {
+func parsePokemon(data []string) *model.Pokemon {
 	return &model.Pokemon{
-		ID: data[0],
+		ID:   data[0],
 		Name: data[1],
 	}
 }

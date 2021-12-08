@@ -27,12 +27,12 @@ type pokeworker interface {
 
 type PokemonsHandler struct {
 	searchService search
-	apiService pokeapi
-	pokeWorker pokeworker
+	apiService    pokeapi
+	pokeWorker    pokeworker
 }
 
 func NewPokemonsHandler(search search, pokeapi pokeapi, pokeworker pokeworker) PokemonsHandler {
-	return PokemonsHandler {
+	return PokemonsHandler{
 		search,
 		pokeapi,
 		pokeworker,
@@ -76,7 +76,7 @@ func (ph PokemonsHandler) Pokedex(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (ph PokemonsHandler) PokeMonstersByWorker(c *gin.Context)  {
+func (ph PokemonsHandler) PokeMonstersByWorker(c *gin.Context) {
 	numItems, _ := strconv.Atoi(c.Param("items"))
 	itemsPerWorker, _ := strconv.Atoi(c.Param("items_per_workers"))
 
@@ -101,15 +101,15 @@ func (ph PokemonsHandler) PokeMonstersByWorker(c *gin.Context)  {
 	c.JSON(http.StatusOK, response)
 }
 
-func workerRequest(wtype string, items int, itemsPerWorker int) (wpool.Request, error){
+func workerRequest(wtype string, items int, itemsPerWorker int) (wpool.Request, error) {
 	v := validator.New()
 	_ = v.RegisterValidation("enum", func(fl validator.FieldLevel) bool {
 		return fl.Field().String() == "odd" || fl.Field().String() == "even"
 	})
 
 	request := wpool.Request{
-		TypeOfJob: wtype,
-		NumberOfItems: items,
+		TypeOfJob:      wtype,
+		NumberOfItems:  items,
 		ItemsPerWorker: itemsPerWorker,
 	}
 
