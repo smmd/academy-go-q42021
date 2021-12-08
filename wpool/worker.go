@@ -32,6 +32,7 @@ func NewPokemonWorker() WorkerHandler {
 
 func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	result := make([]*model.Pokemon, 0)
+	errs := make(chan error, 1)
 	channelJobs := make(chan []string, request.ItemsPerWorker)
 	channelResult := make (chan *model.Pokemon)
 	isOdd := request.TypeOfJob == "odd"
@@ -50,11 +51,15 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 
 	var wg sync.WaitGroup
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		worker(channelJobs, channelResult, isOdd, request.NumberOfItems)
-	}()
+	workerCount := request.NumberOfItems / request.ItemsPerWorker
+	wg.Add(workerCount)
+
+	for i := 0; i < workerCount; i++ {
+		go func() {
+			defer wg.Done()
+			worker(channelJobs, channelResult, isOdd, request.ItemsPerWorker)
+		}()
+	}
 
 	go func() {
 		for {
@@ -63,6 +68,7 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 				break
 			}
 			if err != nil {
+				errs <- err
 				break
 			}
 
@@ -70,7 +76,10 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 		}
 
 		close(channelJobs)
+		close(errs)
 	}()
+
+	//for _, e := range er
 
 	go func() {
 		wg.Wait()
@@ -92,28 +101,26 @@ func worker(channelJobs <-chan []string, channelResult chan<- *model.Pokemon, is
 	countItems := 0
 
 	for {
-		select {
-		case job, ok := <-channelJobs:
-			if !ok {
-				return
-			}
-
-			if countItems == limit {
-				return
-			}
-
-			pokeId, _ := strconv.Atoi(job[0])
-			if isOdd && pokeId%2 != 0 {
-				continue
-			}
-
-			if !isOdd && pokeId%2 == 0 {
-				continue
-			}
-
-			channelResult <- parsePokemon(job)
-			countItems++
+		job, ok := <-channelJobs
+		if !ok {
+			return
 		}
+
+		if countItems == limit {
+			return
+		}
+
+		pokeId, _ := strconv.Atoi(job[0])
+		if isOdd && pokeId%2 != 0 {
+			continue
+		}
+
+		if !isOdd && pokeId%2 == 0 {
+			continue
+		}
+
+		channelResult <- parsePokemon(job)
+		countItems++
 	}
 }
 
