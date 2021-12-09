@@ -1,11 +1,13 @@
 package wpool
 
 import (
-	"github.com/smmd/academy-go-q42021/model"
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/smmd/academy-go-q42021/model"
 )
 
 var pokeMonstersToGenerate = []string{

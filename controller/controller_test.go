@@ -2,9 +2,11 @@ package controller
 
 import (
 	"errors"
-	"github.com/smmd/academy-go-q42021/wpool"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/smmd/academy-go-q42021/wpool"
 )
 
 func Test_WorkerRequest(t *testing.T) {
