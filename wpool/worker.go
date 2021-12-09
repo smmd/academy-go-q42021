@@ -38,7 +38,7 @@ func NewPokemonWorker() WorkerHandler {
 
 func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	result := make([]*model.Pokemon, 0)
-	csvError := make(chan error, 1)
+	channelCSVError := make(chan error, 1)
 	channelJobs := make(chan []string, request.ItemsPerWorker)
 	channelResult := make(chan *model.Pokemon)
 
@@ -79,14 +79,15 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 				break
 			}
 			if err != nil {
-				csvError <- err
+				//TODO: read channelCSVError to send it throw Response.Err
+				channelCSVError <- err
 				break
 			}
 
 			channelJobs <- rStr
 		}
 
-		close(csvError)
+		close(channelCSVError)
 		close(channelJobs)
 	}()
 
@@ -144,7 +145,10 @@ func worker(channelJobs <-chan []string, channelResult chan<- *model.Pokemon, co
 		}
 
 		channelResult <- parsePokemon(job)
+
+		//This might throw a race condition TODO: mutex or something.
 		conditions.maxItems--
+
 		countItems++
 	}
 }
