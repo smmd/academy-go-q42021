@@ -16,6 +16,7 @@ type Conditions struct {
 	isOdd          bool
 	limitPerWorker int
 	maxItems       int
+	mutex          sync.Mutex
 }
 
 type Request struct {
@@ -30,6 +31,11 @@ type Response struct {
 	JobRequest Request
 }
 
+type Result struct {
+	Result *model.Pokemon
+	Err    error
+}
+
 type WorkerHandler struct{}
 
 func NewPokemonWorker() WorkerHandler {
@@ -38,14 +44,13 @@ func NewPokemonWorker() WorkerHandler {
 
 func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	result := make([]*model.Pokemon, 0)
-	channelCSVError := make(chan error, 1)
 	channelJobs := make(chan []string, request.ItemsPerWorker)
-	channelResult := make(chan *model.Pokemon)
+	channelCSVResult := make(chan Result)
 
 	conditions := &Conditions{
-		request.TypeOfJob == "odd",
-		request.ItemsPerWorker,
-		request.NumberOfItems,
+		isOdd:          request.TypeOfJob == "odd",
+		limitPerWorker: request.ItemsPerWorker,
+		maxItems:       request.NumberOfItems,
 	}
 
 	file, err := os.Open(FileName)
@@ -68,7 +73,7 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 	for i := 0; i < workersNumber; i++ {
 		go func() {
 			defer wg.Done()
-			worker(channelJobs, channelResult, conditions)
+			worker(channelJobs, channelCSVResult, conditions)
 		}()
 	}
 
@@ -79,25 +84,35 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 				break
 			}
 			if err != nil {
-				//TODO: read channelCSVError to send it through Response.Err
-				channelCSVError <- err
+				result := Result{
+					Err: err,
+				}
+
+				channelCSVResult <- result
 				break
 			}
 
 			channelJobs <- rStr
 		}
 
-		close(channelCSVError)
 		close(channelJobs)
 	}()
 
 	go func() {
 		wg.Wait()
-		close(channelResult)
+		close(channelCSVResult)
 	}()
 
-	for r := range channelResult {
-		result = append(result, r)
+	for r := range channelCSVResult {
+		if r.Err != nil {
+			return Response{
+				Value:      nil,
+				Err:        r.Err,
+				JobRequest: request,
+			}
+		}
+
+		result = append(result, r.Result)
 	}
 
 	return Response{
@@ -117,7 +132,7 @@ func workerCount(numberOfItems int, itemsPerWorker int) int {
 	return count
 }
 
-func worker(channelJobs <-chan []string, channelResult chan<- *model.Pokemon, conditions *Conditions) {
+func worker(channelJobs <-chan []string, channelResult chan<- Result, conditions *Conditions) {
 	countItems := 0
 
 	for {
@@ -131,9 +146,11 @@ func worker(channelJobs <-chan []string, channelResult chan<- *model.Pokemon, co
 			return
 		}
 
+		conditions.mutex.Lock()
 		if conditions.maxItems == 0 {
 			return
 		}
+		conditions.mutex.Unlock()
 
 		pokeId, _ := strconv.Atoi(job[0])
 		if conditions.isOdd && pokeId%2 != 0 {
@@ -144,10 +161,15 @@ func worker(channelJobs <-chan []string, channelResult chan<- *model.Pokemon, co
 			continue
 		}
 
-		channelResult <- parsePokemon(job)
+		result := Result{
+			Result: parsePokemon(job),
+		}
 
-		//This might throw a race condition TODO: mutex or something.
+		channelResult <- result
+
+		conditions.mutex.Lock()
 		conditions.maxItems--
+		conditions.mutex.Unlock()
 
 		countItems++
 	}

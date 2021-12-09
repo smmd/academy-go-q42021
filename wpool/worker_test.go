@@ -71,24 +71,27 @@ func Test_Worker(t *testing.T) {
 		jobsInput  []string
 		expected   []*model.Pokemon
 		conditions *Conditions
+		err        error
 	}{
 		{
-			"append results",
+			"append results even IDs",
 			pokeMonstersToGenerate,
 			evenPokeMonstersExpected,
 			generateConditions(false, 5, 5),
+			nil,
 		},
 		{
-			"append results",
+			"append results odd IDs",
 			pokeMonstersToGenerate,
 			oddPokeMonstersExpected,
 			generateConditions(true, 4, 4),
+			nil,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			testResult := make(chan *model.Pokemon)
+			testResult := make(chan Result)
 			testJobs := make(chan []string, len(tc.jobsInput))
 
 			var wg sync.WaitGroup
@@ -112,7 +115,8 @@ func Test_Worker(t *testing.T) {
 
 			i := 0
 			for r := range testResult {
-				assert.Equal(t, tc.expected[i], r)
+				assert.Equal(t, tc.expected[i], r.Result)
+				assert.NoError(t, r.Err)
 				i++
 			}
 		})
