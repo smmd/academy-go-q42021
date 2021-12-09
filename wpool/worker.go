@@ -79,7 +79,7 @@ func (wh WorkerHandler) PokemonWorkerPool(request Request) Response {
 				break
 			}
 			if err != nil {
-				//TODO: read channelCSVError to send it throw Response.Err
+				//TODO: read channelCSVError to send it through Response.Err
 				channelCSVError <- err
 				break
 			}
