@@ -26,12 +26,12 @@ var expectedPokedex = model.PokeMonsters{
 	},
 }
 
-func TestAllPokeMonsters_GetAllPokeMonsters(t *testing.T)  {
-	testCases := []struct{
-		name string
+func TestAllPokeMonsters_GetAllPokeMonsters(t *testing.T) {
+	testCases := []struct {
+		name     string
 		expected model.PokeMonsters
 		hasError bool
-		err error
+		err      error
 		argument string
 	}{
 		{
@@ -43,7 +43,7 @@ func TestAllPokeMonsters_GetAllPokeMonsters(t *testing.T)  {
 		},
 		{
 			"file no exist error",
-			model.PokeMonsters{ []model.Pokemon{}},
+			model.PokeMonsters{[]model.Pokemon{}},
 			true,
 			errors.New("open fixtures/pokedex_data_fail.csv: no such file or directory"),
 			"fixtures/pokedex_data_fail.csv",
@@ -67,9 +67,9 @@ func TestAllPokeMonsters_GetAllPokeMonsters(t *testing.T)  {
 }
 
 func TestCsvRepo_WritePokeMonsters(t *testing.T) {
-	response := model.Response {
+	response := model.Response{
 		"jotto",
-		[]model.PokemonOriginal {
+		[]model.PokemonOriginal{
 			{
 				1,
 				model.PokemonSpecies{

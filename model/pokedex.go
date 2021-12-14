@@ -1,7 +1,7 @@
 package model
 
 type Response struct {
-	Name    string    `json:"name"`
+	Name            string            `json:"name"`
 	PokemonOriginal []PokemonOriginal `json:"pokemon_entries"`
 }
 

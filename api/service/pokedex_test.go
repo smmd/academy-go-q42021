@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -43,12 +42,12 @@ func (ms mockCsvRepo) GetAllPokeMonsters(filePath string) (model.PokeMonsters, e
 
 func TestSearchService_GetAll(t *testing.T) {
 	testCases := []struct {
-		name string
+		name     string
 		response model.PokeMonsters
 		argument string
-		repoErr error
+		repoErr  error
 		expected model.PokeMonsters
-		err error
+		err      error
 	}{
 		{
 			"get all pokemons properly",
@@ -60,15 +59,13 @@ func TestSearchService_GetAll(t *testing.T) {
 		},
 		{
 			"error when repository emtpy response",
-			model.PokeMonsters{ []model.Pokemon{}},
+			model.PokeMonsters{[]model.Pokemon{}},
 			"repository/files/pokedex_data.csv",
 			errors.New("test error"),
-			model.PokeMonsters{ []model.Pokemon{}},
+			model.PokeMonsters{[]model.Pokemon{}},
 			errors.New("test error"),
 		},
 	}
-
-	gin.SetMode(gin.TestMode)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -84,7 +81,7 @@ func TestSearchService_GetAll(t *testing.T) {
 	}
 }
 
-func TestSearchService_GetOneByID(t *testing.T)  {
+func TestSearchService_GetOneByID(t *testing.T) {
 	expected := model.Pokemon{
 		"3",
 		"pikachu",

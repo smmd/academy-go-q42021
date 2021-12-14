@@ -2,9 +2,14 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/smmd/academy-go-q42021/model"
 	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+
+	"github.com/smmd/academy-go-q42021/model"
+	"github.com/smmd/academy-go-q42021/wpool"
 )
 
 type search interface {
@@ -16,15 +21,21 @@ type pokeapi interface {
 	ConsumeNationalPokedex() error
 }
 
-type PokemonsHandler struct {
-	searchService search
-	apiService pokeapi
+type pokeworker interface {
+	PokemonWorkerPool(wpool.Request) wpool.Response
 }
 
-func NewPokemonsHandler(search search, pokeapi pokeapi) PokemonsHandler {
-	return PokemonsHandler {
+type PokemonsHandler struct {
+	searchService search
+	apiService    pokeapi
+	pokeWorker    pokeworker
+}
+
+func NewPokemonsHandler(search search, pokeapi pokeapi, pokeworker pokeworker) PokemonsHandler {
+	return PokemonsHandler{
 		search,
 		pokeapi,
+		pokeworker,
 	}
 }
 
@@ -63,4 +74,49 @@ func (ph PokemonsHandler) Pokedex(c *gin.Context) {
 	response["message"] = "OK"
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (ph PokemonsHandler) PokeMonstersByWorker(c *gin.Context) {
+	numItems, _ := strconv.Atoi(c.Param("items"))
+	itemsPerWorker, _ := strconv.Atoi(c.Param("items_per_workers"))
+
+	wrequest, err := workerRequest(
+		c.Param("type"),
+		numItems,
+		itemsPerWorker,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := ph.pokeWorker.PokemonWorkerPool(wrequest)
+
+	if response.Err != nil {
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func workerRequest(wtype string, items int, itemsPerWorker int) (wpool.Request, error) {
+	v := validator.New()
+	_ = v.RegisterValidation("enum", func(fl validator.FieldLevel) bool {
+		return fl.Field().String() == "odd" || fl.Field().String() == "even"
+	})
+
+	request := wpool.Request{
+		TypeOfJob:      wtype,
+		NumberOfItems:  items,
+		ItemsPerWorker: itemsPerWorker,
+	}
+
+	err := v.Struct(request)
+	if err != nil {
+		return request, fmt.Errorf("invalid request: %w", err)
+	}
+
+	return request, nil
 }
